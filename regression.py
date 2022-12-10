@@ -2,12 +2,24 @@ import pandas as pd
 import numpy as np
 from sklearn.linear_model import LinearRegression
 from sklearn.linear_model import Lasso
+from sklearn.linear_model import HuberRegressor
+from sklearn.linear_model import TheilSenRegressor
+from sklearn.pipeline import make_pipeline
+from sklearn.linear_model import QuantileRegressor
+from sklearn.preprocessing import StandardScaler
+import warnings
+warnings.filterwarnings("ignore")
 from sklearn.model_selection import train_test_split
+from sklearn.kernel_ridge import KernelRidge
+from sklearn.linear_model import SGDRegressor
 from sklearn import metrics
 from sklearn.linear_model import Ridge
 from sklearn.preprocessing import StandardScaler
+from sklearn.neighbors import RadiusNeighborsRegressor
+from sklearn.isotonic import IsotonicRegression
 from sklearn.linear_model import LinearRegression
 from sklearn.linear_model import Ridge
+from sklearn.linear_model import LassoLars
 from sklearn.linear_model import Lasso
 from sklearn.ensemble import BaggingRegressor
 from sklearn.ensemble import RandomForestRegressor
@@ -47,6 +59,15 @@ selected_df=df[['week_1','week_2','week_3','week_4','num_sessions','min_29','min
 X_train,X_test,y_train,y_test=train_test_split(df.drop("num_sessions",inplace=False,axis=1), df['num_sessions'], test_size=0.2)
 
 models = []
+
+#models.append(('Isotonic Regression',IsotonicRegression()))
+models.append(('HuberRegressor', HuberRegressor(max_iter=1000)))
+models.append(('TheilSenRegressor',TheilSenRegressor()))
+#models.append(('QuantileRegressor',QuantileRegressor()))
+models.append(('RadiusRegressor',RadiusNeighborsRegressor(radius=0.00005)))
+models.append(('SGDRegressor',make_pipeline(StandardScaler(),SGDRegressor(max_iter=1000, tol=1e-3))))
+models.append(('KernelRidge', KernelRidge()))
+models.append(('LassoLars',LassoLars()))
 models.append(('Linear Regression', LinearRegression()))
 models.append(('Lasso', Lasso()))
 models.append(('Ridge', Ridge()))
@@ -58,11 +79,14 @@ models.append(('Bagging', BaggingRegressor()))
 models.append(('ExtraTreesRegressor', ExtraTreesRegressor()))
 models.append(('KNN', KNeighborsRegressor()))
 
+print("%20s: %10s (%10s) %10s" % ("name","var_score","mae","mse"))
 for name, model in models:
     model.fit(X_train, y_train)
     predictions = model.predict(X_test)
     score = explained_variance_score(y_test, predictions)
     mae = mean_absolute_error(predictions, y_test)
     mse=mean_squared_error(y_test,predictions)
-    msg = "%s: %f (%f) %f" % (name, score, mae, mse)
+    msg = "%20s: %10f (%10f) %10f" % (name, score, mae, mse)
     print(msg)
+    if(name=='LassoLars'):
+        print()

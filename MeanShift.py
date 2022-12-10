@@ -2,6 +2,7 @@ import pandas as pd
 import pandas as ps
 import numpy as np
 from sklearn.cluster import KMeans, AgglomerativeClustering, DBSCAN
+from sklearn.cluster import MeanShift
 from sklearn.decomposition import PCA
 import matplotlib.pyplot as plt
 from sklearn.cluster import SpectralClustering
@@ -26,9 +27,8 @@ def k_means(data, n_clusters):
   plt.show()
 
 def spectral(data, n_clusters):
-  clustering = SpectralClustering(n_clusters=10,
-  assign_labels = 'discretize',
-  random_state = 0).fit(data)
+  clustering=MeanShift(cluster_all=False,n_jobs=-1).fit(data)
+
   y_pred = clustering.labels_.astype(int)
   colors = np.array(
     list(
@@ -61,10 +61,8 @@ def spectral(data, n_clusters):
 
 results = {}
 for i in range(2,11):
-    clusterx = SpectralClustering(n_clusters=i,
-  assign_labels = 'discretize',
-  random_state = 0)
     print(i)
+    clusterx = MeanShift(cluster_all=False,n_jobs=-1)
     labels=clusterx.fit_predict(data_pca)
     #labels = kmeans.fit_predict(X)
     db_index = calinski_harabasz_score(data_pca, labels)
